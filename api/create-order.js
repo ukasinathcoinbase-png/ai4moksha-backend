@@ -1,10 +1,9 @@
 const Razorpay = require("razorpay");
+const { BOOKS, setCors } = require("./_catalog");
 
 module.exports = async (req, res) => {
   // Allow your GitHub Pages site to call this endpoint
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  setCors(res);
 
   if (req.method === "OPTIONS") {
     return res.status(200).end();
@@ -14,10 +13,11 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { amount, receipt } = req.body || {};
+    const { book } = req.body || {};
+    const item = BOOKS[book];
 
-    if (!amount || typeof amount !== "number" || amount < 100) {
-      return res.status(400).json({ error: "Invalid amount. Must be at least 100 paise." });
+    if (!item) {
+      return res.status(400).json({ error: "Unknown book." });
     }
 
     const instance = new Razorpay({
@@ -25,10 +25,13 @@ module.exports = async (req, res) => {
       key_secret: process.env.RAZORPAY_KEY_SECRET,
     });
 
+    // The price comes from the catalog, never from the browser.
+    // The book id is saved on the order so verify-payment knows what was bought.
     const order = await instance.orders.create({
-      amount: amount,
+      amount: item.amount,
       currency: "INR",
-      receipt: receipt || ("ai4moksha_" + Date.now()),
+      receipt: "ai4moksha_" + Date.now(),
+      notes: { book: book },
     });
 
     return res.status(200).json({
