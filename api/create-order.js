@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { book } = req.body || {};
+    const { book, email } = req.body || {};
     const item = BOOKS[book];
 
     if (!item) {
@@ -31,7 +31,8 @@ module.exports = async (req, res) => {
       amount: item.amount,
       currency: "INR",
       receipt: "ai4moksha_" + Date.now(),
-      notes: { book: book },
+      // The buyer's email (asked on the site) is kept so verify-payment can send the link.
+      notes: { book: book, email: typeof email === "string" ? email.slice(0, 200) : "" },
     });
 
     return res.status(200).json({
