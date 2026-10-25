@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const Razorpay = require("razorpay");
 const { BOOKS, downloadLink, setCors } = require("./_catalog");
+const { sendDownloadEmail } = require("./_email");
 
 // Called by the site after Razorpay checkout succeeds.
 // Returns the download link only if Razorpay's signature proves the payment is real.
@@ -54,7 +55,16 @@ module.exports = async (req, res) => {
       return res.status(500).json({ error: "Download link not set up yet. Please email ai4moksha@gmail.com with your payment id." });
     }
 
-    return res.status(200).json({ name: item.name, link: link });
+    // Email the link to the address the buyer gave Razorpay at checkout.
+    let emailed = false;
+    try {
+      const payment = await instance.payments.fetch(razorpay_payment_id);
+      emailed = await sendDownloadEmail(payment.email, item.name, link);
+    } catch (err) {
+      console.error("Could not look up buyer email:", err);
+    }
+
+    return res.status(200).json({ name: item.name, link: link, emailed: emailed });
   } catch (err) {
     console.error("Payment verification failed:", err);
     return res.status(500).json({ error: "Could not verify payment" });
