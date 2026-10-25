@@ -55,11 +55,15 @@ module.exports = async (req, res) => {
       return res.status(500).json({ error: "Download link not set up yet. Please email ai4moksha@gmail.com with your payment id." });
     }
 
-    // Email the link to the address the buyer gave Razorpay at checkout.
+    // Email the link to the address the buyer gave on the site, or to Razorpay at checkout.
     let emailed = false;
     try {
-      const payment = await instance.payments.fetch(razorpay_payment_id);
-      emailed = await sendDownloadEmail(payment.email, item.name, link);
+      let to = order.notes && order.notes.email;
+      if (!to) {
+        const payment = await instance.payments.fetch(razorpay_payment_id);
+        to = payment.email;
+      }
+      emailed = await sendDownloadEmail(to, item.name, link);
     } catch (err) {
       console.error("Could not look up buyer email:", err);
     }
