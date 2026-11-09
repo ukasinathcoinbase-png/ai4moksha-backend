@@ -16,7 +16,9 @@ const BOOKS = {
   "upi-11": { name: "Nirvana Shatkam",             amount: 3900 },
   "upi-12": { name: "Siva Tandava Stotram",        amount: 3900 },
   "upi-13": { name: "Sivananda Lahari",            amount: 9900 },
-  "upi-14": { name: "Kanaka Dhara Stotram",        amount: 3900 }
+  "upi-14": { name: "Kanaka Dhara Stotram",        amount: 3900 },
+  "upi-15": { name: "Hanuman Chalisa",             amount: 3900 },
+  "upi-16": { name: "Sri Lalita Sahasranamam",     amount: 9900 }
 };
 
 function downloadLink(bookId) {
