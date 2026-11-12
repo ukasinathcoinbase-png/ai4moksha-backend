@@ -3,6 +3,8 @@
 Vercel functions for the Ai4Moksha ebook checkout.
 
 - `api/create-order.js` creates a Razorpay order. The site sends only the book id (for example `upi-3`); the price comes from `api/_catalog.js`.
+- `api/order-status.js` lets the site ask again, when the buyer comes back from their UPI app, whether the order is paid; if so it returns the link.
+- `api/razorpay-webhook.js` is called by Razorpay after every payment, so the link is emailed even if the buyer never comes back to the site.
 - `api/verify-payment.js` checks Razorpay's payment signature and, only if it is valid, returns that book's download link and emails it to the buyer.
 
 ## Environment variables (Vercel → Project → Settings → Environment Variables)
@@ -20,3 +22,13 @@ Download links are kept in `EBOOK_LINKS` and not in the code, because this repos
 To change a price, edit `api/_catalog.js` and update the price shown on the site to match.
 
 If `BREVO_API_KEY` or `EMAIL_FROM` is missing, no email is sent, but the buyer still sees the download link on screen.
+
+## Razorpay webhook (one-time setup)
+
+Razorpay Dashboard → Account & Settings → Webhooks → Add New Webhook:
+
+- Webhook URL: `https://ai4moksha-backend.vercel.app/api/razorpay-webhook`
+- Secret: any word (the backend does not rely on it; it re-checks every order with Razorpay's API)
+- Active events: tick `order.paid`
+
+Every sale also sends a "New sale" email to `EMAIL_FROM`, so you can help any buyer by hand.

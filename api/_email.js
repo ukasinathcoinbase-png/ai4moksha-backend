@@ -40,4 +40,39 @@ async function sendDownloadEmail(to, bookName, link) {
   }
 }
 
-module.exports = { sendDownloadEmail };
+// Tells the shop owner (EMAIL_FROM) about every sale, so a buyer who did not
+// get the link can still be helped by hand.
+async function sendSaleNotice(sale) {
+  if (!process.env.BREVO_API_KEY || !process.env.EMAIL_FROM) return false;
+  try {
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": process.env.BREVO_API_KEY,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify({
+        sender: { name: "AI4Moksha", email: process.env.EMAIL_FROM },
+        to: [{ email: process.env.EMAIL_FROM }],
+        subject: "New sale: " + sale.book,
+        textContent:
+          "Book: " + sale.book + "\n" +
+          "Buyer email: " + (sale.buyer || "(not given, the buyer only saw the link on screen)") + "\n" +
+          "Payment id: " + (sale.paymentId || "-") + "\n" +
+          "Order id: " + sale.orderId + "\n" +
+          (sale.linkMissing ? "\nWARNING: this book has no link in EBOOK_LINKS, so the buyer got NO download. Please send it by hand.\n" : ""),
+      }),
+    });
+    if (!response.ok) {
+      console.error("Brevo refused the sale notice:", response.status, await response.text());
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("Could not send sale notice:", err);
+    return false;
+  }
+}
+
+module.exports = { sendDownloadEmail, sendSaleNotice };
