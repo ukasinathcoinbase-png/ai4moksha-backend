@@ -18,7 +18,9 @@ const BOOKS = {
   "upi-13": { name: "Sivananda Lahari",            amount: 9900 },
   "upi-14": { name: "Kanaka Dhara Stotram",        amount: 3900 },
   "upi-15": { name: "Hanuman Chalisa",             amount: 3900 },
-  "upi-16": { name: "Sri Lalita Sahasranamam",     amount: 9900 }
+  "upi-16": { name: "Sri Lalita Sahasranamam",     amount: 9900 },
+  "upi-17": { name: "Bhagavad Gita Chapter 11",    amount: 3900 },
+  "upi-18": { name: "Sri Rama Pattabhishekam",     amount: 3900 }
 };
 
 function downloadLink(bookId) {
